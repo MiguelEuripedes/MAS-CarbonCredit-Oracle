@@ -1,4 +1,4 @@
-# Carbon MAS v2
+# Carbon MAS Oracle
 ## An Agentic Oracle Architecture for the Tokenization of Vehicular Carbon Microcredits
 
 > Master's Dissertation Prototype · Hyperledger Besu · LangChain · Ollama · Solidity
