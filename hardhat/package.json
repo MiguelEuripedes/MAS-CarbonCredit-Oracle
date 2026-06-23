@@ -1,0 +1,15 @@
+{
+  "name": "carbon-mas-contracts",
+  "version": "2.0.0",
+  "description": "Hardhat tests for EmissionsRegistry and CarbonCredit contracts",
+  "scripts": {
+    "test":     "hardhat test",
+    "test:gas": "REPORT_GAS=true hardhat test",
+    "compile":  "hardhat compile",
+    "clean":    "hardhat clean"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.22.0"
+  }
+}

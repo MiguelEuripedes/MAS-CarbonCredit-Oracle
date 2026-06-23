@@ -1,0 +1,41 @@
+# ── Secrets / environment ──────────────────────────────────────────────────────
+.env
+.env.local
+*.key
+
+# ── Python ─────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.descarbon-mas-venv/
+descarbon-mas-venv/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# ── Project artifacts ──────────────────────────────────────────────────────────
+compiled/
+*.db
+*.sqlite
+*.sqlite3
+report.json
+results/
+
+# ── Hardhat / Node ─────────────────────────────────────────────────────────────
+node_modules/
+hardhat/node_modules/
+hardhat/cache/
+hardhat/artifacts/
+
+# ── Editors / OS ───────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+/docs
+/data
+/data_synthetic
