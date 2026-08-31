@@ -1,7 +1,53 @@
 # Carbon MAS Oracle
-## An Agentic Oracle Architecture for the Tokenization of Vehicular Carbon Microcredits
+## An Explainable Multi-Agent Oracle Architecture for Vehicular Carbon Microcredit Tokenization Using Large Language Models and Permissioned Blockchain
 
-> Master's Dissertation Prototype · Hyperledger Besu · LangChain · Ollama · Solidity
+> Hyperledger Besu · LangChain · Ollama · Solidity · FastAPI
+
+---
+
+## Authors
+
+| Author | Affiliation | Contact |
+|---|---|---|
+| **Miguel Amaral** | Federal University of Rio Grande do Norte (UFRN), Natal, RN, Brazil | miguel.amaral.111@ufrn.edu.br |
+| **Marianne Silva** | Federal University of Alagoas (UFAL), Penedo Campus, Penedo, AL, Brazil | marianne.silva@penedo.ufal.br |
+| **Wilson S. Melo Júnior** | National Institute of Metrology, Quality and Technology (INMETRO), Duque de Caxias, RJ, Brazil | wsjunior@inmetro.gov.br |
+| **Carlos M. D. Viegas** | Federal University of Rio Grande do Norte (UFRN), Natal, RN, Brazil | carlos.viegas@ufrn.br |
+| **Ivanovitch Silva** | Federal University of Rio Grande do Norte (UFRN), Natal, RN, Brazil | ivanovitch.silva@ufrn.br |
+
+---
+
+## Abstract
+
+The decarbonization of the transportation sector requires automated, auditable, and scalable Measurement, Reporting, and Verification (MRV) mechanisms to ensure environmental integrity. Although distributed ledger technology and tokenization offer transparency for carbon markets, conventional blockchain oracles operate as passive data relays or rely on opaque machine learning models that lack deterministic reproducibility and explainable audit trails. This paper presents an explainable multi-agent oracle architecture for the automated tokenization of vehicular carbon microcredits. The primary artificial intelligence contribution is an agentic pipeline governed by a fail-safe orchestrator that establishes a separation of concerns, ensuring that physical plausibility checks and credit issuance logic remain entirely deterministic while Large Language Models (LLMs) are restricted to generating verifiable natural language audit justifications. The engineering application processes real-time On-Board Diagnostics II (OBD-II) telemetry series using stoichiometric and speed-density physical formulations to quantify carbon dioxide (CO₂) emissions against dynamic baseline standards. The proposed architecture was deployed on a permissioned Hyperledger Besu blockchain network executing under Quorum Byzantine Fault Tolerance consensus. Experimental validation using real-world vehicular telemetry and synthetic anomaly datasets demonstrated 100% recall in identifying physical sensor tampering and fraudulent reporting scenarios. Furthermore, a city-scale urban traffic simulation comprising 37,360 trips sustained more than 112,000 on-chain transactions without operational failures. The results demonstrate that LLM-based agentic architectures can provide transparent and explainable governance for cyber-physical engineering systems without compromising the determinism and cryptographic integrity required by digital asset registries.
+
+**Keywords:** Agentic Oracles · Explainable Artificial Intelligence · Multi-Agent Systems · Vehicular Emissions · Permissioned Blockchain · Carbon Microcredits
+
+### Highlights
+
+- Explainable multi-agent oracle architecture for vehicular carbon microcredits.
+- Decoupled deterministic decision logic from LLM natural language justifications.
+- Physics-based speed-density formulation and Z-score outlier detection on OBD-II data.
+- Achieved 100% recall in detecting physical sensor tampering and synthetic fraud.
+- Over 112,000 transactions processed under city-scale simulated traffic load.
+
+---
+
+## How the Paper Maps to This Repository
+
+| Paper section | Where it lives in the code |
+|---|---|
+| Multi-agent design, orchestrator and moderation | `orchestrator.py`, `agents/` |
+| Physics-based CO₂ estimation (MAF / speed-density) | `tools/co2_tools.py` |
+| Physical-plausibility checks (hard reject) | `tools/co2_tools.py` → `check_physical_plausibility()` |
+| Z-score statistical validation | `agents/validator_agent.py`, `session_store.py` |
+| Distance-proportional baseline and credit rule | `agents/governance_agent.py` |
+| Data integrity (SHA-256 anchoring) and provenance | `tools/csv_tools.py`, `api.py` → `POST /verify` |
+| Smart contracts and three-account role separation | `contracts/`, `deploy_contracts.py` |
+| Scalability experiment (concurrency sweep) | `benchmarks/benchmark_tokenizacao.py` |
+| City-scale urban traffic experiment (SUMO/TraCI) | `benchmarks/benchmark_sumo.py` |
+| Accuracy and robustness experiments | `run_system_tests.py`, `analysis/` |
+| Auditability and traceability reports | `audit/` |
 
 ---
 
