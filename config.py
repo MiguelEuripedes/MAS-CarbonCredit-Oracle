@@ -38,7 +38,7 @@ OLLAMA_NUM_PREDICT: int = int(os.getenv("OLLAMA_NUM_PREDICT", "1024"))
 PIPELINE_VERSION: str = "2.0.0"
 
 # ── Vehicle defaults ──────────────────────────────────────────────────────────
-DEFAULT_ENGINE_CC: float = float(os.getenv("DEFAULT_ENGINE_CC", "2000"))
+DEFAULT_ENGINE_CC: float = float(os.getenv("DEFAULT_ENGINE_CC", "1000"))
 
 # ── Carbon credit policy (deterministic rule engine) ──────────────────────────
 # Grams of CO2 saved = 1 CCT token (before 18-decimal wei scaling)
@@ -48,7 +48,7 @@ CO2_PER_CREDIT_GRAM: float = float(os.getenv("CO2_PER_CREDIT_GRAM", "1000"))
 # Credits are issued when actual emissions < (baseline × distance).
 BASELINE_CO2_G_PER_KM: float = float(os.getenv("BASELINE_CO2_G_PER_KM", "175"))
 # Fixed fallback (mg) used only when the session has no speed data (distance_km == 0)
-BASELINE_CO2_MG: float = float(os.getenv("BASELINE_CO2_MG", "200000"))
+BASELINE_CO2_MG: float = float(os.getenv("BASELINE_CO2_MG", "175000"))
 
 # ── CCT pricing ───────────────────────────────────────────────────────────────
 # Fixed EUR price per CCT. 1 CCT = 1 kg CO2 saved, so this is (exchange €/tonne ÷ 1000).
