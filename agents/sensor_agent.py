@@ -8,7 +8,7 @@ import json
 import pandas as pd
 from langchain_core.prompts import ChatPromptTemplate
 
-from agents.base import get_llm, extract_json, build_pipeline_metadata
+from agents.base import get_llm, extract_json, build_pipeline_metadata, agent_prompt_texts
 from tools.co2_tools import calculate_co2_physics, check_physical_plausibility
 from tools.csv_tools import validate_dataframe
 from session_store import get_vehicle_history
@@ -112,7 +112,7 @@ class SensorAgent:
             }
 
         # Pipeline metadata fingerprint (stored on-chain)
-        pipeline_metadata = build_pipeline_metadata({"sensor": _SYSTEM})
+        pipeline_metadata = build_pipeline_metadata(agent_prompt_texts())
 
         return {
             "agent":             "SensorAgent",
