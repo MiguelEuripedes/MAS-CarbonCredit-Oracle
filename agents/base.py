@@ -31,6 +31,25 @@ def extract_json(text: str) -> dict:
     return json.loads(text.strip())
 
 
+def agent_prompt_texts() -> dict[str, str]:
+    """
+    System and human templates of every agent whose text is stored on-chain.
+
+    Hashing both templates of all four agents makes each stored justification
+    traceable to the exact prompt version that produced it. The imports are local
+    because every agent module imports this one.
+    """
+    from agents import blockchain_agent, governance_agent, sensor_agent, validator_agent
+
+    modules = {
+        "sensor":     sensor_agent,
+        "validator":  validator_agent,
+        "governance": governance_agent,
+        "blockchain": blockchain_agent,
+    }
+    return {name: module._SYSTEM + module._HUMAN for name, module in modules.items()}
+
+
 def build_pipeline_metadata(prompt_texts: dict[str, str]) -> str:
     """
     Build a JSON string containing model fingerprint + prompt hashes.
