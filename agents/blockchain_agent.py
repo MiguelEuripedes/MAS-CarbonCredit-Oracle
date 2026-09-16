@@ -86,8 +86,8 @@ class BlockchainAgent:
         sha256_hex     = sensor_report.get("sha256_hex", "0" * 64)
         pipeline_meta  = sensor_report.get("pipeline_metadata", "")
 
-        # Justificativa composta dos 3 agentes, gravada on-chain (string, sem limite
-        # no contrato). Limites generosos por agente para preservar a explicação.
+        # Combined justification of the 3 agents, stored on-chain (string, no length limit
+        # in the contract). Generous per-agent limits preserve the explanation.
         agent_decision = (
             f"Sensor: {sensor_report.get('assessment', '')[:400]} | "
             f"Validator: {validator_report.get('reasoning', '')[:400]} | "

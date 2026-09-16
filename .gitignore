@@ -23,6 +23,7 @@ compiled/
 *.sqlite3
 report.json
 results/
+analysis/plot_sumo_mapa.py
 
 # ── Hardhat / Node ─────────────────────────────────────────────────────────────
 node_modules/
@@ -39,3 +40,5 @@ Thumbs.db
 /docs
 /data
 /data_synthetic
+
+README-backup.md

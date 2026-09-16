@@ -7,14 +7,18 @@ stores one JSON report per session under a timestamped run folder.
 Two dataset layouts are auto-detected per file:
 
   1. Real data:        data/<vehicle>/<trip>.csv
-       vehicle_id = "<vehicle>-<VIN>"        e.g. "creta-9BHPC81EBTP234663"
+       vehicle_id = "<vehicle>-<VIN>"        e.g. "creta-PSEUDO-CRETA"
        Files directly under the data dir use their filename stem as <vehicle>.
 
   2. Synthetic tests:  data_synthetic/csv_testes_<vehicle>_viagem_<n>/<NN_scenario>.csv
-       vehicle_id = "<vehicle>-<VIN>-rodada-<NN>"
+       vehicle_id = "<vehicle>-<VIN>-v<n>-rodada-<NN>"
        Keeps each scenario isolated so fraud/anomaly cases don't pollute one
        another's Z-score history. The scenario label and trip number are stored
        in the manifest for analysis.
+
+The Portuguese identifiers come from the dataset layout: "csv_testes" means test
+CSVs, "viagem" means trip and "rodada" holds the scenario number NN. They are kept
+because they appear in the manifests and in the vehicle IDs stored on-chain.
 
 When the VIN column is missing/null (pandas reads "null" as NaN), "unknownvin"
 is used as the suffix.

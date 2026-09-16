@@ -1,5 +1,5 @@
-# Carbon MAS Oracle
-## An Explainable Multi-Agent Oracle Architecture for Vehicular Carbon Microcredit Tokenization Using Large Language Models and Permissioned Blockchain
+# Multi Agent System Carbon Oracle
+## From Emissions to Tokens: An Explainable Multi-Agent Oracle for Vehicular Carbon Microcredits Using LLMs and Permissioned Blockchain
 
 > Hyperledger Besu · LangChain · Ollama · Solidity · FastAPI
 
@@ -19,7 +19,7 @@
 
 ## Abstract
 
-The decarbonization of the transportation sector requires automated, auditable, and scalable Measurement, Reporting, and Verification (MRV) mechanisms to ensure environmental integrity. Although distributed ledger technology and tokenization offer transparency for carbon markets, conventional blockchain oracles operate as passive data relays or rely on opaque machine learning models that lack deterministic reproducibility and explainable audit trails. This paper presents an explainable multi-agent oracle architecture for the automated tokenization of vehicular carbon microcredits. The primary artificial intelligence contribution is an agentic pipeline governed by a fail-safe orchestrator that establishes a separation of concerns, ensuring that physical plausibility checks and credit issuance logic remain entirely deterministic while Large Language Models (LLMs) are restricted to generating verifiable natural language audit justifications. The engineering application processes real-time On-Board Diagnostics II (OBD-II) telemetry series using stoichiometric and speed-density physical formulations to quantify carbon dioxide (CO₂) emissions against dynamic baseline standards. The proposed architecture was deployed on a permissioned Hyperledger Besu blockchain network executing under Quorum Byzantine Fault Tolerance consensus. Experimental validation using real-world vehicular telemetry and synthetic anomaly datasets demonstrated 100% recall in identifying physical sensor tampering and fraudulent reporting scenarios. Furthermore, a city-scale urban traffic simulation comprising 37,360 trips sustained more than 112,000 on-chain transactions without operational failures. The results demonstrate that LLM-based agentic architectures can provide transparent and explainable governance for cyber-physical engineering systems without compromising the determinism and cryptographic integrity required by digital asset registries.
+The decarbonization of the transportation sector requires automated, auditable, and scalable Measurement, Reporting, and Verification (MRV) mechanisms to ensure environmental integrity. Although distributed ledger technology and tokenization offer transparency for carbon markets, conventional blockchain oracles operate as passive data relays or rely on opaque machine learning models that lack deterministic reproducibility and explainable audit trails. This paper presents an explainable multi-agent oracle architecture for the automated tokenization of vehicular carbon microcredits. The primary artificial intelligence contribution is an agentic pipeline governed by a fail-safe orchestrator that establishes a separation of concerns, ensuring that physical plausibility checks and credit issuance logic remain entirely deterministic while Large Language Models (LLMs) are restricted to generating verifiable natural language audit justifications. The engineering application processes real-time On-Board Diagnostics II (OBD-II) telemetry series using stoichiometric and speed-density physical formulations to quantify carbon dioxide (CO₂) emissions against dynamic baseline standards. The proposed architecture was deployed on a permissioned Hyperledger Besu blockchain network executing under Quorum Byzantine Fault Tolerance consensus. Experimental validation using real-world vehicular telemetry and synthetic anomaly datasets demonstrated 100% recall in identifying physical sensor tampering and fraudulent reporting scenarios. Furthermore, a city-scale urban traffic simulation comprising 37,360 trips sustained more than 112,000 on-chain transactions without operational failures. The results demonstrate that LLM-based agentic architectures can provide transparent and explainable governance for cyber-physical engineering systems without compromising the determinism and cryptographic integrity required by digital asset registries. 
 
 **Keywords:** Agentic Oracles · Explainable Artificial Intelligence · Multi-Agent Systems · Vehicular Emissions · Permissioned Blockchain · Carbon Microcredits
 
@@ -42,12 +42,13 @@ The decarbonization of the transportation sector requires automated, auditable, 
 | Physical-plausibility checks (hard reject) | `tools/co2_tools.py` → `check_physical_plausibility()` |
 | Z-score statistical validation | `agents/validator_agent.py`, `session_store.py` |
 | Distance-proportional baseline and credit rule | `agents/governance_agent.py` |
-| Data integrity (SHA-256 anchoring) and provenance | `tools/csv_tools.py`, `api.py` → `POST /verify` |
+| Data integrity (SHA-256 anchoring) and provenance | `tools/csv_tools.py`, `agents/base.py`, `api.py` → `POST /verify` |
 | Smart contracts and three-account role separation | `contracts/`, `deploy_contracts.py` |
-| Scalability experiment (concurrency sweep) | `benchmarks/benchmark_tokenizacao.py` |
+| Scalability experiment (concurrency sweep) | `benchmarks/benchmark_tokenization.py` |
 | City-scale urban traffic experiment (SUMO/TraCI) | `benchmarks/benchmark_sumo.py` |
 | Accuracy and robustness experiments | `run_system_tests.py`, `analysis/` |
 | Auditability and traceability reports | `audit/` |
+| Anonymized real and synthetic telemetry | `data_public/` |
 
 ---
 
@@ -65,8 +66,7 @@ The decarbonization of the transportation sector requires automated, auditable, 
 9b. [Batch System Testing & Result Analysis](#9b-batch-system-testing--result-analysis)
 10. [The CSV Format](#10-the-csv-format)
 11. [The 3-Account Role Model](#11-the-3-account-role-model)
-12. [Security Improvements in v2](#12-security-improvements-in-v2)
-13. [Troubleshooting](#13-troubleshooting)
+12. [Troubleshooting](#12-troubleshooting)
 
 ---
 
@@ -76,7 +76,7 @@ A vehicle records a driving session via an OBD-II adapter. The raw sensor data
 (RPM, MAF airflow, temperature, pressure) is saved as a CSV file. This system:
 
 1. **Calculates CO₂ emissions** using a physics-based model (Ideal Gas Law + fuel factors)
-2. **Validates the reading** with physical-plausibility checks plus a statistical Z-score test against the vehicle's own history
+2. **Validates the reading** with physical-plausibility checks plus a statistical Z-score test against the vehicle's own history (once the vehicle has at least 5 validated sessions; before that, a range check)
 3. **Decides whether to issue carbon credits** using a deterministic rule engine with a distance-based baseline (175 g CO₂/km)
 4. **Writes everything to a blockchain** — permanently, with a cryptographic link to the original data
 5. **Mints one ERC-721 certificate NFT** (`CarbonCertificate`) to the vehicle owner's wallet if the session beats the CO₂ baseline
@@ -90,7 +90,7 @@ stored on-chain as the human-readable audit trail. This is the core design princ
 ## 2. Project Structure
 
 ```
-carbon-mas-v2/
+MAS-CarbonCredit-Oracle/
 │
 ├── contracts/                    ← Solidity smart contracts
 │   ├── EmissionsRegistry.sol     ← Immutable CO₂ ledger (3-role access control)
@@ -129,26 +129,30 @@ carbon-mas-v2/
 ├── config.py                     ← All settings from .env
 │
 ├── benchmarks/                   ← Scalability experiments (blockchain layer)
-│   ├── benchmark_tokenizacao.py  ← Synthetic load sweep: TPS, tx/block, nonce manager
+│   ├── benchmark_tokenization.py ← Synthetic load sweep: TPS, tx/block, nonce manager
 │   ├── benchmark_sumo.py         ← SUMO-driven live tokenization (urban traffic)
 │   └── benchmark_blockchain.py   ← Legacy benchmark (previous HTTP API)
 │
 ├── audit/                        ← Traceability & on-chain auditability
-│   ├── auditar_tokens.py         ← Batch SHA-256 integrity check of minted tokens (via API)
-│   ├── rastreabilidade_token.py  ← Provenance-chain diagram for a token
-│   └── relatorio_auditoria_onchain.py ← Per-trip audit report read from the chain
+│   ├── audit_tokens.py           ← Batch SHA-256 integrity check of minted tokens (via API)
+│   ├── traceability_token.py     ← Provenance-chain diagram for a token
+│   └── onchain_audit_report.py   ← Per-trip audit report read from the chain
 │
 ├── analysis/                     ← Results analysis + figures (notebooks & scripts)
-│   ├── analise_acertividade.ipynb  ← Fraud detection / credit correctness
-│   ├── analise_latencia.ipynb      ← Per-phase latency (5 runs)
-│   ├── analise_escalabilidade.py   ← Worker-sweep scalability curve
-│   ├── analise_resultados.py       ← Multi-run consolidation
-│   ├── replot_figuras.py           ← Re-styles figures for the dissertation
-│   ├── plot_sumo_mapa.py           ← Renders the SUMO road network + bounding box
+│   ├── accuracy_analysis.ipynb     ← Fraud detection / credit correctness
+│   ├── latency_analysis.ipynb      ← Per-phase latency (5 runs)
+│   ├── scalability_analysis.py     ← Worker-sweep scalability curve
+│   ├── results_analysis.py         ← Multi-run consolidation
 │   └── manifest_analysis.ipynb     ← Single-run manifest analysis
 │
+├── data_public/                  ← Anonymized telemetry used in the paper
+│   ├── data/                     ← Real OBD-II trips (4 vehicles × 2 trips)
+│   ├── data_synthetic/           ← 80 synthetic files (legitimate, fraud and invalid scenarios)
+│   ├── README.md                 ← Contents and anonymization
+│   └── SHA256SUMS.txt            ← SHA-256 digests of the published files
+│
 ├── requirements.txt
-└──.env.example                  ← Template for your configuration
+└── .env.example                  ← Template for your configuration
 ```
 
 > **Run location:** the scripts in `benchmarks/`, `audit/` and `analysis/` are meant
@@ -170,13 +174,13 @@ Key fields per record:
 |-------|------|-------------|
 | `vehicleId` | string | Off-chain vehicle identifier (VIN, plate, etc.) |
 | `co2Milligrams` | uint256 | Total session CO₂ in milligrams |
-| `fuelType` | string | Gasolina / Diesel / Etanol |
+| `fuelType` | string | Gasolina / Diesel / Etanol (gasoline / diesel / ethanol) |
 | `dataHash` | bytes32 | SHA-256 of the original raw CSV file |
 | `agentConfidence` | uint8 | Statistical validator confidence (0-100) |
 | `requiresHumanReview` | bool | True when confidence < 70 |
 | `governanceStatus` | enum | Pending → Approved or Denied |
 | `agentDecision` | string | LLM-written audit rationale (on-chain) |
-| `pipelineMetadata` | string | Model name + prompt hashes fingerprint |
+| `pipelineMetadata` | string | Model name + pipeline version + prompt hashes of the four agents |
 
 Role model (3 accounts):
 - **Owner (Account 1)**: can grant/revoke roles only. Never signs operational transactions.
@@ -235,9 +239,9 @@ Handles CSV loading with two entry points:
   for CO₂ calculation and returns a validation report dict.
 
 Fuel type is resolved in priority order:
-1. `fuel_model_prediction` column (lab ML classifier format, e.g. `"gasoline"`) — majority class wins
+1. `fuel_model_prediction` column (ML classifier format, e.g. `"gasoline"`) — majority class wins
 2. `fuel_type` column (legacy format, Portuguese names)
-3. Default: `"Gasolina"`
+3. Default: `"Gasolina"` (gasoline)
 
 ### `tools/sanitize.py`
 
@@ -271,11 +275,12 @@ automatically up to 5 times with exponential backoff (via `tenacity`).
 
 ### `agents/base.py`
 
-Creates the Ollama LLM instance and provides two utilities:
+Creates the Ollama LLM instance and provides the shared utilities:
 
 - `get_llm(temperature)` — returns a `ChatOllama` instance using your configured model
 - `extract_json(text)` — robustly parses JSON from LLM output (handles fenced code blocks, embedded JSON, etc.)
-- `build_pipeline_metadata(prompts)` — creates a fingerprint dict with model name, pipeline version, and SHA-256 hashes of the agent system prompts. This is stored on-chain with every record.
+- `agent_prompt_texts()` — collects the system and human prompt templates of the four agents
+- `build_pipeline_metadata(prompts)` — creates a JSON fingerprint with model name, pipeline version, and SHA-256 hashes (first 12 hex digits) of those prompt templates. This is stored on-chain with every record.
 
 ### `agents/sensor_agent.py` — Phase 1
 
@@ -333,8 +338,10 @@ credits_wei = int(credits_cct * 1e18)
 Only issues credits if: (1) validator approved the record AND (2) saved_mg > 0.
 
 **Layer 2 (LLM)**:
-- Receives the credit decision as a fixed fact
+- Receives the deterministic facts of the outcome (rejected at validation, valid without credit, or credit issued).
 - Writes the governance rationale that goes on-chain
+- A deterministic consistency check (`_rationale_is_consistent()`) replaces the text with a deterministic template when it is empty, mentions a baseline for a session rejected at validation, or omits the avoided emissions of an issued credit
+- The report field `rationale_source` records whether the stored text came from the LLM (`llm`) or from the template (`template`)
 
 ### `agents/blockchain_agent.py` — Phase 4
 
@@ -372,7 +379,6 @@ SQLite-backed persistence layer with two tables:
 - Used by ValidatorAgent to build the statistical baseline
 
 **`jobs`** — API pipeline job tracking (survives server restarts)
-- Replaces the in-memory dict from v1
 - `count_vehicle_jobs_last_hour(vehicle_id)` powers the rate limiting
 
 ### `deploy_contracts.py`
@@ -397,12 +403,13 @@ FastAPI server with async background pipeline execution.
 | `/status/{job_id}` | GET | Poll job status: pending / running / done / failed |
 | `/result/{job_id}` | GET | Full pipeline report once done |
 | `/record/{id}` | GET | Query any emission record from blockchain |
+| `/verify` | POST | Upload the original CSV with a `token_id` or `record_id` and compare its SHA-256 with the on-chain `dataHash` |
 | `/portfolio/{address}` | GET | NFT count + certificates + CO₂ saved (mg & g) + EUR & BRL value |
 | `/price/cct-eur` | GET | CCT price in EUR & BRL (fixed `.env` snapshots, no external API) |
 | `/jobs` | GET | List recent jobs |
 | `/health` | GET | Checks Besu + Ollama + contracts + job queue |
 
-Rate limiting: 20 requests/minute per IP (global), plus per-vehicle limits
+Rate limiting: 20 requests/minute per IP on `/process` and `/process-envelope` and 60 on `/verify`, plus per-vehicle limits
 configured in `.env` (`RATE_LIMIT_PER_VEHICLE_PER_HOUR`, `MIN_SESSION_GAP_SECONDS`).
 
 ### `main.py`
@@ -445,18 +452,18 @@ CSV file (bytes)
   4. check_physical_plausibility()  ← deterministic fraud sanity checks
   5. validate_dataframe()           ← column checks, null percentages
   6. get_vehicle_history()          ← load past sessions from SQLite
-  7. LLM: assess data quality only  ← produces quality label + assessment text
+  7. LLM: assess data quality       ← produces quality label + assessment text
       │ moderator check: is total_co2_mg a valid number?
       ▼
 [ValidatorAgent]
   8. _statistical_decision()        ← plausibility hard-reject → Z-score/range (pure Python)
-  9. LLM: explain the decision only ← produces reasoning text for audit
+  9. LLM: explain the decision      ← produces reasoning text for audit
       │ moderator check: does 'approved' key exist?
       ▼
 [GovernanceAgent]
  10. dynamic baseline (175 g/km)    ← distance_km × BASELINE_CO2_G_PER_KM
  11. _credit_decision()             ← deterministic formula (pure Python)
- 12. LLM: write governance rationale ← on-chain text explaining the decision
+ 12. LLM: write governance rationale ← consistency-checked, template fallback
       │ moderator check: is credits_wei a valid integer?
       ▼
 [BlockchainAgent]  ← skipped entirely in dry-run mode
@@ -651,8 +658,8 @@ curl http://localhost:8000/price/cct-eur
 
 ### Running subsequent sessions (Z-score kicks in)
 
-After the first session, run more with the same vehicle ID. From the 5th session
-onwards, the ValidatorAgent switches from range-check to Z-score validation using
+After the first session, run more with the same vehicle ID. From the 6th session
+onwards (after 5 validated sessions), the ValidatorAgent switches from range-check to Z-score validation using
 the vehicle's own CO₂ history. You can watch the confidence score change:
 
 ```bash
@@ -776,34 +783,57 @@ runs every CSV under a data folder and writes one JSON report per session plus a
 
 It auto-detects two layouts:
 
-- **Real data** — `data/<vehicle>/<trip>.csv` → `vehicle_id = "<vehicle>-<VIN>"`.
-- **Synthetic** — `data_synthetic/csv_testes_<vehicle>_viagem_<n>/<NN_scenario>.csv`
-  → `vehicle_id = "<vehicle>-<VIN>-rodada-<NN>"`. Each scenario is isolated so
+- **Real data** — `data_public/data/<vehicle>/<trip>.csv` → `vehicle_id = "<vehicle>-<VIN>"`.
+- **Synthetic** — `data_public/data_synthetic/csv_testes_<vehicle>_viagem_<n>/<NN_scenario>.csv`
+  → `vehicle_id = "<vehicle>-<VIN>-v<n>-rodada-<NN>"`. Each scenario is isolated so
   fraud/anomaly cases don't pollute one another's Z-score history.
+
+The dataset names keep the Portuguese terms used during data collection: `csv_testes`
+means test CSVs, `viagem` means trip and `rodada` holds the scenario number `NN`. The same
+fields appear in the manifests and in the vehicle IDs stored on-chain.
 
 **History isolation**: if the data-dir name contains `synthetic`, the SQLite
 history defaults to a separate DB (`carbon_mas_synthetic.db`) so synthetic frauds
-never contaminate real-vehicle history. Override with `--db`.
+never contaminate real-vehicle history. Override with `--db`. With `--api`, the pipeline
+runs in the API server and uses the server's history DB instead.
 
 ```bash
 # Real data → blockchain
-python run_system_tests.py
+python run_system_tests.py --data-dir data_public/data
 
 # Synthetic scenarios → separate DB, no blockchain
-python run_system_tests.py --data-dir data_synthetic --dry-run
+python run_system_tests.py --data-dir data_public/data_synthetic --dry-run
 
 # Custom recipient / engine size
-python run_system_tests.py --recipient 0xACCOUNT_2 --engine-cc 1600
+python run_system_tests.py --data-dir data_public/data --recipient 0xACCOUNT_2 --engine-cc 1600
 ```
 
 Each manifest session row records `total_co2_g`, `co2_saved_g`, `distance_km`,
 `confidence`, `anomaly`, `governance_decision`, `credits_cct`, `token_id`, and
 timing.
 
+### Reproducing the experiments in the paper
+
+The accuracy, robustness and latency results were obtained with `llama3.1:8b`,
+`BASELINE_CO2_G_PER_KM=175` and `MIN_SESSION_GAP_SECONDS=0` (the two trips of each real
+vehicle are submitted in sequence), with the remaining thresholds as in `.env.example`.
+Before each run, move `carbon_mas.db` out of the project root so the history starts
+empty, run `python deploy_contracts.py` and restart the API server
+(`uvicorn api:app --port 8000 --workers 1`). Then submit the files through the API:
+
+```bash
+# Synthetic benchmark (five runs)
+python run_system_tests.py --api --engine-cc 1000 --data-dir data_public/data_synthetic
+
+# Real dataset (one run)
+python run_system_tests.py --api --engine-cc 1000 --data-dir data_public/data
+```
+
 ### Analysing the results
 
-Open `manifest_analysis.ipynb` (needs only `pandas` + `matplotlib`). It loads the
-latest `_manifest.json` and produces, for the dissertation:
+Open `analysis/manifest_analysis.ipynb` (needs only `pandas` + `matplotlib`). It loads the
+latest `_manifest.json` and produces:
+
 
 - An **accuracy / confusion matrix** of the agentic oracle on synthetic scenarios
   (expected vs. actual decision), including **false positives** (frauds that wrongly
@@ -811,10 +841,10 @@ latest `_manifest.json` and produces, for the dissertation:
 - A **CO₂-savings bar chart** per trip.
 - **Emission intensity** (g CO₂/km) vs. the 175 g/km baseline, anomaly-type counts,
   and confidence/timing histograms.
-- An exported `analise_consolidada.csv` next to the manifest.
+- An exported `consolidated_analysis.csv` next to the manifest.
 
 ```bash
-jupyter notebook manifest_analysis.ipynb
+jupyter notebook analysis/manifest_analysis.ipynb
 ```
 
 ---
@@ -829,7 +859,7 @@ jupyter notebook manifest_analysis.ipynb
 | `rpm` | Required if no MAF | Engine speed |
 | `intake_air_temperature` | Required if no MAF | °C |
 | `intake_manifold_absolut_pressure` | Required if no MAF | kPa |
-| `fuel_type` | Optional | Gasolina / Diesel / Etanol |
+| `fuel_type` | Optional | Gasolina / Diesel / Etanol (gasoline / diesel / ethanol) |
 | `speed` | Optional | km/h — drives trip distance and the dynamic credit baseline (175 g/km × distance). Without it, the fixed `BASELINE_CO2_MG` fallback is used |
 | `engine_load` | Optional | For statistics |
 
@@ -845,6 +875,8 @@ The system also accepts the lab's ML classifier output column:
 
 When this column is present, the majority class across all rows becomes the session fuel type. It takes priority over `fuel_type` if both are present.
 
+The anonymized telemetry in `data_public/` follows the lab format. See `data_public/README.md` for its contents and the anonymization applied.
+
 ---
 
 ## 11. The 3-Account Role Model
@@ -859,7 +891,7 @@ This is how the 3 accounts are used, and why:
 | **logEmission()** | ❌ | ✅ | ❌ |
 | **validateEmission()** | ❌ | ✅ | ❌ |
 | **updateGovernanceStatus()** | ❌ | ❌ | ✅ |
-| **issueCredit() (mint CCT)** | ❌ | ❌ | ✅ |
+| **mintCertificate()** | ❌ | ❌ | ✅ |
 | **Private key in .env** | `OWNER_PRIVATE_KEY` | `EMISSION_PRIVATE_KEY` | `GOVERNANCE_PRIVATE_KEY` |
 
 **Why separate accounts?** If the emission agent key is compromised, the attacker
@@ -871,7 +903,7 @@ the owner's ability to revoke that key's role.
 
 ---
 
-## 13. Troubleshooting
+## 12. Troubleshooting
 
 **`solcx.exceptions.SolcInstallationError`**
 → Run `pip install py-solc-x --upgrade` then retry `deploy_contracts.py`
@@ -891,7 +923,7 @@ the owner's ability to revoke that key's role.
 
 **`LLM parse error — using physics values directly`**
 → Normal fallback. The system continues with deterministic values.
-  Try `llama3:8b` or `mistral` for better JSON compliance.
+  The results in the paper were obtained with `llama3.1:8b`.
 
 **First session always uses range-check, not Z-score**
 → Expected. Z-score requires `STAT_VALIDATION_MIN_HISTORY` (default: 5) validated
@@ -900,4 +932,12 @@ the owner's ability to revoke that key's role.
 **`HTTP 429 — rate limit`**
 → Wait the indicated seconds, or lower `MIN_SESSION_GAP_SECONDS` in `.env` for testing.
 
+## Data availability
 
+The source code, the smart contracts, the evaluation scripts and an anonymized copy of
+the vehicular telemetry are openly available in this repository. In `data_public/`,
+vehicle identification numbers were replaced by pseudonyms, GPS coordinates were
+removed and absolute timestamps were removed or replaced by elapsed time. The columns
+used by the pipeline are unchanged, so the CO₂ totals, anomaly labels and credit
+decisions reported in the paper are preserved. Because the files were modified, their
+SHA-256 digests differ from those anchored on-chain during the experiments.
